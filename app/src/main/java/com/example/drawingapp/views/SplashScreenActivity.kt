@@ -14,13 +14,14 @@ class SplashScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Use View Binding
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Delay for 2 seconds then navigate to DrawActivity
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, DrawActivity::class.java))
-            finish()
-        }, 2000)
+            finish() // Prevent user from going back to splash screen
+        }, 2000) // 2000ms = 2 seconds
     }
 }
