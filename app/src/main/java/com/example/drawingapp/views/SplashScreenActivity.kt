@@ -5,23 +5,20 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import com.example.drawingapp.databinding.ActivitySplashBinding
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class SplashScreenActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivitySplashBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Use official splash screen API
+        val splashScreen = installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
-        // Use View Binding
-        binding = ActivitySplashBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // Delay for 2 seconds then navigate to DrawActivity
+        // Keep splash screen visible for a fixed time (e.g., 2 seconds)
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, DrawActivity::class.java))
-            finish() // Prevent user from going back to splash screen
-        }, 2000) // 2000ms = 2 seconds
+            finish() // Prevents returning to splash screen
+        }, 3000) // 2000ms = 2 seconds
     }
 }

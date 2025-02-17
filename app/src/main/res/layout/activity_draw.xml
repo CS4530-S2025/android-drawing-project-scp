@@ -6,5 +6,11 @@
     <com.example.drawingapp.model.CustomCanvas
         android:id="@+id/drawCanvas"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="118dp"
+        android:layout_height="65dp"
+        android:text="Draw test" />
 </FrameLayout>
