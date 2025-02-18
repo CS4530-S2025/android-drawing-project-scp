@@ -1,24 +1,24 @@
 package com.example.drawingapp.view
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.drawingapp.view.WelcomeScreenActivity
 
 class SplashScreenActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Use official splash screen API
-        val splashScreen = installSplashScreen()
+        // Use splash screen API for Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            installSplashScreen()
+        }
 
         super.onCreate(savedInstanceState)
 
-        // Keep splash screen visible for a fixed time (e.g., 2 seconds)
-        Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, DrawActivity::class.java))
-            finish() // Prevents returning to splash screen
-        }, 3000) // 2000ms = 2 seconds
+        // Transition to the new Welcome Screen
+        startActivity(Intent(this, WelcomeScreenActivity::class.java))
+        finish() // Prevents user from going back to the splash screen
     }
 }

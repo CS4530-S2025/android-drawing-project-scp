@@ -29,6 +29,9 @@
         </intent-filter>
     </activity>
 
+        <activity android:name=".view.WelcomeScreenActivity"
+            android:exported="false"
+            android:theme="@style/Theme.DrawingApp.FullScreen"/>
 
         <!-- Draw Activity -->
         <activity
