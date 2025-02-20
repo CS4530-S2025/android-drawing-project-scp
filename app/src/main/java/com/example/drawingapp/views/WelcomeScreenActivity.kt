@@ -6,7 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.example.drawingapp.databinding.ActivityWelcomeScreenBinding
-import com.example.drawingapp.view.DrawActivity
+import com.example.drawingapp.views.MainActivity
 
 class WelcomeScreenActivity : AppCompatActivity() {
 
@@ -21,7 +21,7 @@ class WelcomeScreenActivity : AppCompatActivity() {
 
         // Delay for 1.5 seconds before transitioning to the main draw screen
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, DrawActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java)) //from DrawActivity to MainActivity
             finish() // Prevent user from returning to this screen
         }, 1500) // 1500ms = 1.5 seconds
     }
