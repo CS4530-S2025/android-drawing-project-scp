@@ -1,22 +1,47 @@
 package com.example.drawingapp.view
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.drawingapp.databinding.ActivityDrawBinding
-import com.example.drawingapp.viewmodel.DrawViewModel
+import android.app.AlertDialog
+import android.graphics.Color
+import android.widget.Button
+import android.widget.SeekBar
+import com.example.drawingapp.R
+import com.example.drawingapp.model.CustomCanvas
 
 class DrawActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityDrawBinding
-    private val drawViewModel: DrawViewModel by viewModels()
+    private lateinit var customCanvas: CustomCanvas
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_draw)
 
-        binding = ActivityDrawBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        customCanvas = findViewById(R.id.drawCanvas)
+        val sizeSeekBar = findViewById<SeekBar>(R.id.sizeSeekBar)
+        val colorButton = findViewById<Button>(R.id.colorButton)
 
-        // Placeholder for drawing logic
+        // Brush Size Handler
+        sizeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                customCanvas.updateBrush(customCanvas.getCurrentBrushColor(), progress.toFloat())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        // Color Picker Handler
+        colorButton.setOnClickListener {
+            val colors = arrayOf("Black", "Red", "Blue", "Green")
+            val colorValues = arrayOf(Color.BLACK, Color.RED, Color.BLUE, Color.GREEN)
+
+            AlertDialog.Builder(this)
+                .setTitle("Pick a Color")
+                .setItems(colors) { _, which ->
+                    customCanvas.updateBrush(colorValues[which], sizeSeekBar.progress.toFloat())
+                }
+                .show()
+        }
     }
 }
