@@ -1,13 +1,13 @@
-package com.example.drawingapp.model
+package com.example.drawingapp
 
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
+import com.example.drawingapp.model.FileHandler
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.io.File
 
 class FileHandlerTest {
 
