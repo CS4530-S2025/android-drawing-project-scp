@@ -1,20 +1,15 @@
 package com.example.drawingapp.model
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
 class CustomCanvas(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
-    // Data class to hold Path and its Paint
     private data class Stroke(val path: Path, val paint: Paint)
 
-    // List to store all strokes
     private val strokes = mutableListOf<Stroke>()
     private var currentPath = Path()
     private var currentPaint = Paint().apply {
@@ -22,31 +17,29 @@ class CustomCanvas(context: Context, attrs: AttributeSet?) : View(context, attrs
         style = Paint.Style.STROKE
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
-        strokeWidth = 10f  // Default size
+        strokeWidth = 10f
+        color = Color.BLACK
     }
 
-    private var path: Path = Path()
-    private var brushSettings = BrushSettings()
+    private lateinit var bitmap: Bitmap
+    private lateinit var canvasBitmap: Canvas
 
-    // Update brush settings for new strokes only
-    fun updateBrush(color: Int, size: Float) {
-        currentPaint.color = color
-        currentPaint.strokeWidth = size
-    }
+    override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight)
 
-    fun getCurrentBrushColor(): Int {
-        return currentPaint.color
+        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        canvasBitmap = Canvas(bitmap)
+        canvasBitmap.drawColor(Color.WHITE)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw all stored strokes
+        canvas.drawBitmap(bitmap, 0f, 0f, null)
         for (stroke in strokes) {
             canvas.drawPath(stroke.path, stroke.paint)
         }
 
-        // Draw the current active path
         canvas.drawPath(currentPath, currentPaint)
     }
 
@@ -58,18 +51,38 @@ class CustomCanvas(context: Context, attrs: AttributeSet?) : View(context, attrs
             MotionEvent.ACTION_DOWN -> {
                 currentPath = Path()
                 currentPath.moveTo(x, y)
-                // Create a new Paint object for this stroke
                 val newPaint = Paint(currentPaint)
                 strokes.add(Stroke(currentPath, newPaint))
             }
             MotionEvent.ACTION_MOVE -> {
                 currentPath.lineTo(x, y)
+                canvasBitmap.drawPath(currentPath, currentPaint)
             }
             MotionEvent.ACTION_UP -> {
+                currentPath.reset()
             }
         }
 
-        invalidate() // Redraw the canvas
+        invalidate()
         return true
+    }
+
+    fun getBitmap(): Bitmap {
+        return bitmap.copy(Bitmap.Config.ARGB_8888, false)
+    }
+
+    fun loadBitmap(savedBitmap: Bitmap) {
+        bitmap = savedBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        canvasBitmap.setBitmap(bitmap)
+        invalidate()
+    }
+
+    fun updateBrush(color: Int, size: Float) {
+        currentPaint.color = color
+        currentPaint.strokeWidth = size
+    }
+
+    fun getCurrentBrushColor(): Int {
+        return currentPaint.color
     }
 }
