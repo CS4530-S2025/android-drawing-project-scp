@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -29,6 +30,11 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose = true // <- turns on Jetpack Compose
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.10" // required for Compose 1.6.x
     }
 
     compileOptions {
@@ -41,7 +47,7 @@ android {
 }
 
 dependencies {
-
+    //Phase 1
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -53,4 +59,16 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     androidTestImplementation(libs.androidx.test.core)
     testImplementation(libs.junit)
+    //Phase 2
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
 }
