@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 
 class DrawViewModel : ViewModel() {
 
-    // Stores the drawing bitmap (saved when the screen rotates)
+    // Stores the current state of drawing bitmap (saved when the screen rotates)
     var drawingBitmap: Bitmap? = null
 
     // Stores brush settings
@@ -20,13 +20,4 @@ class DrawViewModel : ViewModel() {
         brushSize = size
     }
 
-    // Save the current canvas bitmap
-    fun saveBitmap(bitmap: Bitmap) {
-        drawingBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false)
-    }
-
-    // Retrieve the saved bitmap
-    fun getSavedBitmap(): Bitmap? {
-        return drawingBitmap
-    }
 }

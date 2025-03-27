@@ -5,6 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.drawingapp.views.DrawingListScreen
+import android.content.Intent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import com.example.drawingapp.views.DrawActivity
 
 /**
  * This Composable sets up your app's navigation graph using NavHost.
@@ -21,10 +25,16 @@ fun AppNavHost(navController: NavHostController) {
 
         // Drawing editor screen — accepts filename as argument
         composable("draw/{filename}") { backStackEntry ->
+            val context = LocalContext.current
             val filename = backStackEntry.arguments?.getString("filename") ?: return@composable
 
-            // You won’t implement this, Person C will
-            // Could call a placeholder for now
+            LaunchedEffect(Unit) {
+                val intent = Intent(context, DrawActivity::class.java).apply {
+                    putExtra("filename", filename)
+                    putExtra("name", "Default name")
+                }
+                context.startActivity(intent)
+            }
         }
     }
 }

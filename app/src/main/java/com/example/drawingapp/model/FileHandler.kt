@@ -13,7 +13,7 @@ class FileHandler(private val context: Context) {
     private val fileName = "temp_drawing.png"
 
     //Save Bitmap to Internal Storage
-    fun saveDrawing(bitmap: Bitmap) {
+    fun saveDrawing(bitmap: Bitmap, filename: String) {
         val file = File(context.filesDir, fileName)
         var outputStream: FileOutputStream? = null
         try {

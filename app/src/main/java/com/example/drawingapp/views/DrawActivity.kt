@@ -1,15 +1,23 @@
-package com.example.drawingapp.view
+package com.example.drawingapp.views
 
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Button
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.drawingapp.R
 import com.example.drawingapp.model.CustomCanvas
 import com.example.drawingapp.model.FileHandler
 import com.example.drawingapp.viewmodel.DrawViewModel
+import kotlinx.coroutines.launch
+import android.content.Intent
+import com.example.drawingapp.model.DrawingEntity
+import com.example.drawingapp.model.DrawingDatabase
+import com.example.drawingapp.views.MainActivity
+
 
 class DrawActivity : AppCompatActivity() {
 
@@ -25,6 +33,10 @@ class DrawActivity : AppCompatActivity() {
 
         customCanvas = findViewById(R.id.drawCanvas)
         fileHandler = FileHandler(this)
+        val drawingDao = DrawingDatabase.getDatabase(this).drawingDao()
+
+        val filename = intent.getStringExtra("filename") ?: "drawing_$(System.currentTimeMillis()}.png"
+        val name = intent.getStringExtra("name") ?: "Untitled Drawing"
 
         val sizeSeekBar = findViewById<SeekBar>(R.id.sizeSeekBar)
         val colorButton = findViewById<Button>(R.id.colorButton)
@@ -36,7 +48,7 @@ class DrawActivity : AppCompatActivity() {
         sizeSeekBar.progress = drawViewModel.brushSize.toInt()
 
         // Restore saved drawing if available
-        drawViewModel.getSavedBitmap()?.let { customCanvas.loadBitmap(it) }
+        //drawViewModel.getSavedBitmap()?.let { customCanvas.loadBitmap(it) }
 
         // Brush Size Handler
         sizeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -68,16 +80,27 @@ class DrawActivity : AppCompatActivity() {
         // Save Button
         saveButton.setOnClickListener {
             val bitmap: Bitmap = customCanvas.getBitmap()
-            fileHandler.saveDrawing(bitmap)
-            drawViewModel.saveBitmap(bitmap) // Save to ViewModel
+            //upload to local storage
+            fileHandler.saveDrawing(bitmap, filename)
+
+            //uploads to database
+            lifecycleScope.launch{
+                val entity = DrawingEntity(
+                    name = name,
+                    filename = filename,
+                    lastEdited = System.currentTimeMillis()
+                )
+                drawingDao.insert(entity)
+            }
+            //see if working
+            Toast.makeText(this, "Drawing saved successfully", Toast.LENGTH_SHORT).show()
         }
 
-        // Load Button
+        // Load Button, go to drawing list
         loadButton.setOnClickListener {
-            fileHandler.loadDrawing()?.let {
-                customCanvas.loadBitmap(it)
-                drawViewModel.saveBitmap(it) // Save to ViewModel
-            }
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 }
