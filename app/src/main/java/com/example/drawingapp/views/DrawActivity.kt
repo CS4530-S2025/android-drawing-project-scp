@@ -1,6 +1,5 @@
 package com.example.drawingapp.views
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Button
 import android.widget.SeekBar
@@ -16,7 +15,7 @@ import kotlinx.coroutines.launch
 import android.content.Intent
 import com.example.drawingapp.model.DrawingEntity
 import com.example.drawingapp.model.DrawingDatabase
-import com.example.drawingapp.views.MainActivity
+import kotlinx.coroutines.Dispatchers
 
 
 class DrawActivity : AppCompatActivity() {
@@ -77,24 +76,29 @@ class DrawActivity : AppCompatActivity() {
                 .show()
         }
 
-        // Save Button
+        //Save Button
         saveButton.setOnClickListener {
-            val bitmap: Bitmap = customCanvas.getBitmap()
-            //upload to local storage
+            val bitmap = customCanvas.getBitmap()
+            val filename = "drawing_${System.currentTimeMillis()}.png"
+
+            //Save bitmap to internal storage
             fileHandler.saveDrawing(bitmap, filename)
 
-            //uploads to database
-            lifecycleScope.launch{
-                val entity = DrawingEntity(
-                    name = name,
-                    filename = filename,
-                    lastEdited = System.currentTimeMillis()
+            //Insert data into Room
+            val dao = DrawingDatabase.getDatabase(this).drawingDao()
+            lifecycleScope.launch(Dispatchers.IO) {
+                dao.insert(
+                    DrawingEntity(
+                        filename = filename,
+                        name = "Untitled",
+                        lastEdited = System.currentTimeMillis()
+                    )
                 )
-                drawingDao.insert(entity)
             }
-            //see if working
-            Toast.makeText(this, "Drawing saved successfully", Toast.LENGTH_SHORT).show()
+
+            Toast.makeText(this, "Drawing saved!", Toast.LENGTH_SHORT).show()
         }
+
 
         // Load Button, go to drawing list
         loadButton.setOnClickListener {

@@ -27,7 +27,8 @@ abstract class DrawingDatabase : RoomDatabase() {
                     context.applicationContext,
                     DrawingDatabase::class.java,
                     "drawing_database"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
