@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class DrawViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Stores the drawing bitmap (saved when the screen rotates)
+    // Stores the current state of drawing bitmap (saved when the screen rotates)
     var drawingBitmap: Bitmap? = null
 
     // Stores brush settings

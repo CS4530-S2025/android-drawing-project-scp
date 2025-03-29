@@ -1,11 +1,11 @@
-package com.example.drawingapp.view
+package com.example.drawingapp.views
 
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.drawingapp.view.WelcomeScreenActivity
+import com.example.drawingapp.views.WelcomeScreenActivity
 
 class SplashScreenActivity : AppCompatActivity() {
 

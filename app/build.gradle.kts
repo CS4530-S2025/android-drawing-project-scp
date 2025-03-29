@@ -35,7 +35,12 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.11"
+        compose = true // <- turns on Jetpack Compose
     }
+
+  //  composeOptions {
+   //     kotlinCompilerExtensionVersion = "1.5.10" // required for Compose 1.6.x
+    //}
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

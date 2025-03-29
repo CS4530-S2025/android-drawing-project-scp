@@ -16,6 +16,8 @@ class FileHandlerTest {
     private lateinit var context: Context
     private var savedFilename: String? = null
 
+    private val testFilename = "unit_test_drawing.png" //Set a filename for test
+
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
@@ -32,6 +34,11 @@ class FileHandlerTest {
 
         // Load it back
         val loadedBitmap = fileHandler.loadDrawing(filename)
+        //Save the drawing with filename
+        fileHandler.saveDrawing(bitmap, testFilename)
+
+        //Load the saved drawing
+        val loadedBitmap = fileHandler.loadDrawing()
         assertNotNull("Loaded bitmap should not be null", loadedBitmap)
         assertEquals("Loaded bitmap width should match", 100, loadedBitmap!!.width)
         assertEquals("Loaded bitmap height should match", 100, loadedBitmap.height)

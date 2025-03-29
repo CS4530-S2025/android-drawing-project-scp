@@ -21,7 +21,7 @@
 
         <!-- Splash Screen Activity (Fixed: Added android:exported="true") -->
         <activity
-        android:name=".view.SplashScreenActivity"
+        android:name=".views.SplashScreenActivity"
         android:exported="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN"/>
@@ -29,7 +29,7 @@
         </intent-filter>
     </activity>
 
-        <activity android:name=".view.WelcomeScreenActivity"
+        <activity android:name=".views.WelcomeScreenActivity"
             android:exported="false"
             android:theme="@style/Theme.DrawingApp.FullScreen"/>
 
