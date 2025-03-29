@@ -41,7 +41,8 @@ class DrawViewModel(application: Application) : AndroidViewModel(application) {
 
     fun persistDrawing(bitmap: Bitmap) {
         viewModelScope.launch(Dispatchers.IO) {
-            val filename = fileHandler.saveDrawing(bitmap)
+            val filename = "drawing_${System.currentTimeMillis()}.png"
+            fileHandler.saveDrawing(bitmap, filename)
             val drawing = DrawingEntity(filename = filename, timestamp = System.currentTimeMillis())
             drawingDao.insertDrawing(drawing)
         }

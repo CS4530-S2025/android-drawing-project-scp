@@ -5,26 +5,19 @@ import android.util.Log
 import android.widget.Button
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.drawingapp.R
 import com.example.drawingapp.data.AppDatabase
-import com.example.drawingapp.data.DrawingEntity
 import com.example.drawingapp.model.CustomCanvas
 import com.example.drawingapp.model.FileHandler
 import com.example.drawingapp.viewmodel.DrawViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
-import android.content.Intent
-import com.example.drawingapp.model.DrawingEntity
+import com.example.drawingapp.data.DrawingEntity
 import com.example.drawingapp.model.DrawingDatabase
-import com.example.drawingapp.views.MainActivity
 
 
 class DrawActivity : AppCompatActivity() {
@@ -36,6 +29,7 @@ class DrawActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_draw)
+        fileHandler = FileHandler(this)
 
         lifecycleScope.launch(Dispatchers.IO) {
             val dao = AppDatabase.getDatabase(this@DrawActivity).drawingDao()
@@ -55,11 +49,12 @@ class DrawActivity : AppCompatActivity() {
         }
 
         drawViewModel = ViewModelProvider(this)[DrawViewModel::class.java]
-        fileHandler = FileHandler(this)
         customCanvas = findViewById(R.id.drawCanvas)
         val drawingDao = DrawingDatabase.getDatabase(this).drawingDao()
 
-        val filename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
+        val filename = intent.getStringExtra("drawing_filename")
+            ?: intent.getStringExtra("filename")
+            ?: "drawing_${System.currentTimeMillis()}.png"
         val name = intent.getStringExtra("name") ?: "Untitled Drawing"
 
         val sizeSeekBar = findViewById<SeekBar>(R.id.sizeSeekBar)
@@ -77,7 +72,6 @@ class DrawActivity : AppCompatActivity() {
         }
 
         // Load from file if opened via DrawingListFragment
-        val filename = intent.getStringExtra("drawing_filename")
         if (filename != null) {
             val bitmap = fileHandler.loadDrawing(filename)
             if (bitmap != null) {
@@ -122,7 +116,8 @@ class DrawActivity : AppCompatActivity() {
             Log.d("DrawActivity", "Save button clicked")
 
             val bitmap = customCanvas.getBitmap()
-            val filename = fileHandler.saveDrawing(bitmap)
+            val filename = "drawing_${System.currentTimeMillis()}.png"
+            fileHandler.saveDrawing(bitmap, filename)
 
             // Save metadata to DB
             val dao = AppDatabase.getDatabase(this).drawingDao()

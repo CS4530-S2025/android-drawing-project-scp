@@ -35,7 +35,6 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.11"
-        compose = true // <- turns on Jetpack Compose
     }
 
   //  composeOptions {
@@ -81,4 +80,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.compose.runtime:runtime:1.6.4")
 }

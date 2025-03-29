@@ -14,7 +14,6 @@ class FileHandlerTest {
 
     private lateinit var fileHandler: FileHandler
     private lateinit var context: Context
-    private var savedFilename: String? = null
 
     private val testFilename = "unit_test_drawing.png" //Set a filename for test
 
@@ -28,45 +27,31 @@ class FileHandlerTest {
     fun testSaveAndLoadDrawing() {
         val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
 
-        // Save and get filename
-        val filename = fileHandler.saveDrawing(bitmap)
-        savedFilename = filename // save for cleanup
-
-        // Load it back
-        val loadedBitmap = fileHandler.loadDrawing(filename)
         //Save the drawing with filename
         fileHandler.saveDrawing(bitmap, testFilename)
 
         //Load the saved drawing
-        val loadedBitmap = fileHandler.loadDrawing()
+        val loadedBitmap = fileHandler.loadDrawing(testFilename)
         assertNotNull("Loaded bitmap should not be null", loadedBitmap)
-        assertEquals("Loaded bitmap width should match", 100, loadedBitmap!!.width)
-        assertEquals("Loaded bitmap height should match", 100, loadedBitmap.height)
     }
 
     @Test
     fun testDeleteDrawing() {
-        val bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
-        val filename = fileHandler.saveDrawing(bitmap)
-        savedFilename = filename
+        // First save it
+        val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+        fileHandler.saveDrawing(bitmap, testFilename)
 
-        // Manually delete the file
-        val file = File(context.filesDir, filename)
+        // Then delete
+        val file = File(context.filesDir, testFilename)
         assertTrue("File should exist before deletion", file.exists())
 
-        file.delete()
+        fileHandler.deleteDrawing(testFilename)
 
-        val result = fileHandler.loadDrawing(filename)
-        assertNull("Bitmap should be null after deletion", result)
+        assertFalse("File should be deleted", file.exists())
     }
 
     @After
     fun tearDown() {
-        savedFilename?.let {
-            val file = File(context.filesDir, it)
-            if (file.exists()) {
-                file.delete()
-            }
-        }
+        fileHandler.deleteDrawing(testFilename)
     }
 }

@@ -9,6 +9,8 @@ import android.content.Intent
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.example.drawingapp.views.DrawActivity
+import androidx.navigation.compose.rememberNavController
+
 
 /**
  * This Composable sets up your app's navigation graph using NavHost.
@@ -20,7 +22,9 @@ fun AppNavHost(navController: NavHostController) {
 
         // Home screen showing list of saved drawings
         composable("home") {
-            DrawingListScreen(navController = navController)
+            DrawingListScreen(onDrawingSelected = { filename ->
+                navController.navigate("draw/$filename")
+            })
         }
 
         // Drawing editor screen — accepts filename as argument
