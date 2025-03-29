@@ -6,7 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.example.drawingapp.databinding.ActivityWelcomeScreenBinding
-import com.example.drawingapp.view.DrawActivity
+import com.example.drawingapp.views.DrawActivity
 
 class WelcomeScreenActivity : AppCompatActivity() {
 

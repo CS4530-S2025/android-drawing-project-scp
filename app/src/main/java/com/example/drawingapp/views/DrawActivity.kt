@@ -1,82 +1,135 @@
-package com.example.drawingapp.view
+package com.example.drawingapp.views
 
-import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.SeekBar
-import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.drawingapp.R
+import com.example.drawingapp.data.AppDatabase
+import com.example.drawingapp.data.DrawingEntity
 import com.example.drawingapp.model.CustomCanvas
 import com.example.drawingapp.model.FileHandler
 import com.example.drawingapp.viewmodel.DrawViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DrawActivity : AppCompatActivity() {
 
     private lateinit var customCanvas: CustomCanvas
+    private lateinit var drawViewModel: DrawViewModel
     private lateinit var fileHandler: FileHandler
-
-    // Get the ViewModel (this survives screen rotations)
-    private val drawViewModel: DrawViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_draw)
 
-        customCanvas = findViewById(R.id.drawCanvas)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val dao = AppDatabase.getDatabase(this@DrawActivity).drawingDao()
+            val drawings = dao.getAllDrawings()
+
+            // Pick the latest (by timestamp) if any
+            val latest = drawings.maxByOrNull { it.timestamp }
+            latest?.let { drawing ->
+                val bitmap = fileHandler.loadDrawing(drawing.filename)
+                if (bitmap != null) {
+                    withContext(Dispatchers.Main) {
+                        customCanvas.loadBitmap(bitmap)
+                        Log.d("DrawActivity", "Loaded last saved drawing: ${drawing.filename}")
+                    }
+                }
+            }
+        }
+
+        drawViewModel = ViewModelProvider(this)[DrawViewModel::class.java]
         fileHandler = FileHandler(this)
+        customCanvas = findViewById(R.id.drawCanvas)
 
         val sizeSeekBar = findViewById<SeekBar>(R.id.sizeSeekBar)
         val colorButton = findViewById<Button>(R.id.colorButton)
         val saveButton = findViewById<Button>(R.id.saveButton)
         val loadButton = findViewById<Button>(R.id.loadButton)
 
-        // Restore saved brush settings
+        // Restore brush settings
         customCanvas.updateBrush(drawViewModel.brushColor, drawViewModel.brushSize)
         sizeSeekBar.progress = drawViewModel.brushSize.toInt()
 
-        // Restore saved drawing if available
-        drawViewModel.getSavedBitmap()?.let { customCanvas.loadBitmap(it) }
+        // Restore drawing if rotated
+        drawViewModel.getSavedBitmap()?.let {
+            customCanvas.loadBitmap(it)
+        }
 
-        // Brush Size Handler
+        // Load from file if opened via DrawingListFragment
+        val filename = intent.getStringExtra("drawing_filename")
+        if (filename != null) {
+            val bitmap = fileHandler.loadDrawing(filename)
+            if (bitmap != null) {
+                customCanvas.loadBitmap(bitmap)
+            }
+        }
+
+        // Brush size adjustment
         sizeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val newSize = progress.toFloat()
                 customCanvas.updateBrush(customCanvas.getCurrentBrushColor(), newSize)
-                drawViewModel.setBrush(customCanvas.getCurrentBrushColor(), newSize) // ✅ Save to ViewModel
+                drawViewModel.setBrush(customCanvas.getCurrentBrushColor(), newSize)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        // Color Picker Handler
+        // Color picker
         colorButton.setOnClickListener {
             val colors = arrayOf("Black", "Red", "Blue", "Green")
-            val colorValues = arrayOf(android.graphics.Color.BLACK, android.graphics.Color.RED, android.graphics.Color.BLUE, android.graphics.Color.GREEN)
+            val colorValues = arrayOf(
+                android.graphics.Color.BLACK,
+                android.graphics.Color.RED,
+                android.graphics.Color.BLUE,
+                android.graphics.Color.GREEN
+            )
 
-            android.app.AlertDialog.Builder(this)
+            AlertDialog.Builder(this)
                 .setTitle("Pick a Color")
                 .setItems(colors) { _, which ->
                     val newColor = colorValues[which]
                     customCanvas.updateBrush(newColor, sizeSeekBar.progress.toFloat())
-                    drawViewModel.setBrush(newColor, sizeSeekBar.progress.toFloat()) // ✅ Save to ViewModel
+                    drawViewModel.setBrush(newColor, sizeSeekBar.progress.toFloat())
                 }
                 .show()
         }
 
-        // Save Button
+        // Save drawing
         saveButton.setOnClickListener {
-            val bitmap: Bitmap = customCanvas.getBitmap()
-            fileHandler.saveDrawing(bitmap)
-            drawViewModel.saveBitmap(bitmap) // Save to ViewModel
+            Log.d("DrawActivity", "Save button clicked")
+
+            val bitmap = customCanvas.getBitmap()
+            val filename = fileHandler.saveDrawing(bitmap)
+
+            // Save metadata to DB
+            val dao = AppDatabase.getDatabase(this).drawingDao()
+            lifecycleScope.launch(Dispatchers.IO) {
+                dao.insertDrawing(DrawingEntity(filename = filename))
+            }
+
+            Log.d("DrawActivity", "Saved to file and DB: $filename")
         }
 
-        // Load Button
+        // Load from rotation cache
         loadButton.setOnClickListener {
-            fileHandler.loadDrawing()?.let {
-                customCanvas.loadBitmap(it)
-                drawViewModel.saveBitmap(it) // Save to ViewModel
+            Log.d("DrawActivity", "Load button clicked")
+
+            val savedBitmap = drawViewModel.getSavedBitmap()
+            if (savedBitmap != null) {
+                customCanvas.loadBitmap(savedBitmap)
+                Log.d("DrawActivity", "Loaded bitmap from ViewModel cache")
+            } else {
+                Log.d("DrawActivity", "No saved bitmap found")
             }
         }
     }

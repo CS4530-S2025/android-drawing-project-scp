@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/welcomeFragment">
+
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.example.drawingapp.views.WelcomeScreenFragment"
+        android:label="Welcome" >
+        <action
+            android:id="@+id/action_welcome_to_list"
+            app:destination="@id/drawingListFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/drawingListFragment"
+        android:name="com.example.drawingapp.views.DrawingListFragment"
+        android:label="Drawings" >
+        <action
+            android:id="@+id/action_drawingListToDraw"
+            app:destination="@id/drawFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/drawFragment"
+        android:name="com.example.drawingapp.views.DrawFragment"
+        android:label="Draw" >
+        <argument
+            android:name="filename"
+            app:argType="string"
+            android:nullable="true" />
+    </fragment>
+
+</navigation>
