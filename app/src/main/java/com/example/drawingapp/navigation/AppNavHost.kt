@@ -26,14 +26,16 @@ fun AppNavHost(navController: NavHostController) {
         // Drawing editor screen — accepts filename as argument
         composable("draw/{filename}") { backStackEntry ->
             val context = LocalContext.current
-            val filename = backStackEntry.arguments?.getString("filename") ?: return@composable
+            val filename = backStackEntry.arguments?.getString("filename")
 
-            LaunchedEffect(Unit) {
-                val intent = Intent(context, DrawActivity::class.java).apply {
-                    putExtra("filename", filename)
-                    putExtra("name", "Default name")
-                }
-                context.startActivity(intent)
+            // ✅ Guard against nulls!
+            if (filename != null) {
+                context.startActivity(
+                    Intent(context, DrawActivity::class.java).apply {
+                        putExtra("filename", filename)
+                        putExtra("name", "My Sketch")
+                    }
+                )
             }
         }
     }

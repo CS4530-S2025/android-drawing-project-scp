@@ -14,6 +14,8 @@ class FileHandlerTest {
     private lateinit var fileHandler: FileHandler
     private lateinit var context: Context
 
+    private val testFilename = "unit_test_drawing.png" //Set a filename for test
+
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
@@ -24,10 +26,10 @@ class FileHandlerTest {
     fun testSaveAndLoadDrawing() {
         val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
 
-        // Save the drawing
-        fileHandler.saveDrawing(bitmap)
+        //Save the drawing with filename
+        fileHandler.saveDrawing(bitmap, testFilename)
 
-        // Load the saved drawing
+        //Load the saved drawing
         val loadedBitmap = fileHandler.loadDrawing()
         assertNotNull("Loaded bitmap should not be null", loadedBitmap)
     }

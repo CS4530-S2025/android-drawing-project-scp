@@ -35,7 +35,7 @@ class DrawActivity : AppCompatActivity() {
         fileHandler = FileHandler(this)
         val drawingDao = DrawingDatabase.getDatabase(this).drawingDao()
 
-        val filename = intent.getStringExtra("filename") ?: "drawing_$(System.currentTimeMillis()}.png"
+        val filename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
         val name = intent.getStringExtra("name") ?: "Untitled Drawing"
 
         val sizeSeekBar = findViewById<SeekBar>(R.id.sizeSeekBar)

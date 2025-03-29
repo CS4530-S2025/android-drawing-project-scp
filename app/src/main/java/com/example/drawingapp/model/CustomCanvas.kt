@@ -6,7 +6,11 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
-class CustomCanvas(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+class CustomCanvas @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
 
     private data class Stroke(val path: Path, val paint: Paint)
 
