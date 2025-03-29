@@ -24,6 +24,9 @@ import com.example.drawingapp.data.DrawingEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.navigation.fragment.findNavController
+import coil.compose.rememberAsyncImagePainter
+
 
 class DrawingListFragment : Fragment() {
 

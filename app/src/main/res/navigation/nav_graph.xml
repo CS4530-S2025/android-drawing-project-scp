@@ -29,7 +29,7 @@
         <argument
             android:name="filename"
             app:argType="string"
-            android:nullable="true" />
+            app:nullable="true" />
     </fragment>
 
 </navigation>
