@@ -10,35 +10,34 @@ import java.io.IOException
 
 class FileHandler(private val context: Context) {
 
-    private val fileName = "temp_drawing.png"
-
-    //Save Bitmap to Internal Storage
+    //Save Bitmap to internal storage
     fun saveDrawing(bitmap: Bitmap, filename: String) {
-        val file = File(context.filesDir, fileName)
-        var outputStream: FileOutputStream? = null
+        val file = File(context.filesDir, filename)
         try {
-            outputStream = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream) // Save as PNG
+            FileOutputStream(file).use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            }
         } catch (e: IOException) {
             e.printStackTrace()
-        } finally {
-            outputStream?.close()
         }
     }
 
-    //Load Bitmap from Internal Storage
-    fun loadDrawing(): Bitmap? {
-        val file = File(context.filesDir, fileName)
+    //Load Bitmap from internal storage using a filename
+    fun loadDrawing(filename: String): Bitmap? {
+        val file = File(context.filesDir, filename)
         return if (file.exists()) {
-            BitmapFactory.decodeStream(FileInputStream(file)) // Decode saved file
-        } else {
-            null // Return null if no saved file exists
-        }
+            try {
+                BitmapFactory.decodeFile(file.absolutePath)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        } else null
     }
 
-    //Delete Saved Drawing
-    fun deleteDrawing() {
-        val file = File(context.filesDir, fileName)
+    //Delete saved drawing file by filename
+    fun deleteDrawing(filename: String) {
+        val file = File(context.filesDir, filename)
         if (file.exists()) {
             file.delete()
         }

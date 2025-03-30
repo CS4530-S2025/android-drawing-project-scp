@@ -16,13 +16,17 @@ class DrawingListViewModel(application: Application) : AndroidViewModel(applicat
 
     private val dao = DrawingDatabase.getDatabase(application).drawingDao()
 
-    // Backing state flow to hold drawing list
     private val _drawings = MutableStateFlow<List<DrawingEntity>>(emptyList())
     val drawings: StateFlow<List<DrawingEntity>> = _drawings
 
     init {
+        refreshDrawings()
+    }
+
+    fun refreshDrawings() {
         viewModelScope.launch {
             _drawings.value = dao.getAll()
         }
     }
 }
+

@@ -27,6 +27,9 @@ fun DrawingListScreen(
     navController: NavController,
     viewModel: DrawingListViewModel = viewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.refreshDrawings()
+    }
     val drawings by viewModel.drawings.collectAsState()
 
     Scaffold(

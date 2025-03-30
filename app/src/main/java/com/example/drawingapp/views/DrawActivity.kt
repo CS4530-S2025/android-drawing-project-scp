@@ -22,6 +22,7 @@ class DrawActivity : AppCompatActivity() {
 
     private lateinit var customCanvas: CustomCanvas
     private lateinit var fileHandler: FileHandler
+    private lateinit var currentFilename: String
 
     // Get the ViewModel (this survives screen rotations)
     private val drawViewModel: DrawViewModel by viewModels()
@@ -30,12 +31,19 @@ class DrawActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_draw)
 
+        currentFilename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
+
         customCanvas = findViewById(R.id.drawCanvas)
         fileHandler = FileHandler(this)
         val drawingDao = DrawingDatabase.getDatabase(this).drawingDao()
 
-        val filename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
+      //  val filename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
         val name = intent.getStringExtra("name") ?: "Untitled Drawing"
+
+        val savedBitmap = fileHandler.loadDrawing(currentFilename)
+        savedBitmap?.let {
+            customCanvas.loadBitmap(it)
+        }
 
         val sizeSeekBar = findViewById<SeekBar>(R.id.sizeSeekBar)
         val colorButton = findViewById<Button>(R.id.colorButton)
@@ -54,7 +62,7 @@ class DrawActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val newSize = progress.toFloat()
                 customCanvas.updateBrush(customCanvas.getCurrentBrushColor(), newSize)
-                drawViewModel.setBrush(customCanvas.getCurrentBrushColor(), newSize) // ✅ Save to ViewModel
+                drawViewModel.setBrush(customCanvas.getCurrentBrushColor(), newSize)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -71,7 +79,7 @@ class DrawActivity : AppCompatActivity() {
                 .setItems(colors) { _, which ->
                     val newColor = colorValues[which]
                     customCanvas.updateBrush(newColor, sizeSeekBar.progress.toFloat())
-                    drawViewModel.setBrush(newColor, sizeSeekBar.progress.toFloat()) // ✅ Save to ViewModel
+                    drawViewModel.setBrush(newColor, sizeSeekBar.progress.toFloat())
                 }
                 .show()
         }
@@ -79,18 +87,15 @@ class DrawActivity : AppCompatActivity() {
         //Save Button
         saveButton.setOnClickListener {
             val bitmap = customCanvas.getBitmap()
-            val filename = "drawing_${System.currentTimeMillis()}.png"
 
-            //Save bitmap to internal storage
-            fileHandler.saveDrawing(bitmap, filename)
+            fileHandler.saveDrawing(bitmap, currentFilename) 
 
-            //Insert data into Room
             val dao = DrawingDatabase.getDatabase(this).drawingDao()
             lifecycleScope.launch(Dispatchers.IO) {
                 dao.insert(
                     DrawingEntity(
-                        filename = filename,
-                        name = "Untitled",
+                        filename = currentFilename,
+                        name = "Untitled", // Optional: add dialog later
                         lastEdited = System.currentTimeMillis()
                     )
                 )
@@ -98,6 +103,7 @@ class DrawActivity : AppCompatActivity() {
 
             Toast.makeText(this, "Drawing saved!", Toast.LENGTH_SHORT).show()
         }
+
 
 
         // Load Button, go to drawing list

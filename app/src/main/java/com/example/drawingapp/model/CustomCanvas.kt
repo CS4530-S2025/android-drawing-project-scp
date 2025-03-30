@@ -25,21 +25,29 @@ class CustomCanvas @JvmOverloads constructor(
         color = Color.BLACK
     }
 
-    private lateinit var bitmap: Bitmap
-    private lateinit var canvasBitmap: Canvas
+    private lateinit var canvasBitmap: Bitmap    //Holds the image pixels
+    private lateinit var drawCanvas: Canvas      //Used to draw on the bitmap
+    private var pendingBitmapToLoad: Bitmap? = null  //Bitmap to be drawn after size is set
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
 
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        canvasBitmap = Canvas(bitmap)
-        canvasBitmap.drawColor(Color.WHITE)
+        canvasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        drawCanvas = Canvas(canvasBitmap)
+        drawCanvas.drawColor(Color.WHITE)
+
+        //Handle delayed bitmap load
+        pendingBitmapToLoad?.let {
+            drawCanvas.drawBitmap(it, 0f, 0f, null)
+            pendingBitmapToLoad = null
+            invalidate()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas.drawBitmap(bitmap, 0f, 0f, null)
+        canvas.drawBitmap(canvasBitmap, 0f, 0f, null)
         for (stroke in strokes) {
             canvas.drawPath(stroke.path, stroke.paint)
         }
@@ -60,7 +68,7 @@ class CustomCanvas @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 currentPath.lineTo(x, y)
-                canvasBitmap.drawPath(currentPath, currentPaint)
+                drawCanvas.drawPath(currentPath, currentPaint)
             }
             MotionEvent.ACTION_UP -> {
                 currentPath.reset()
@@ -72,13 +80,16 @@ class CustomCanvas @JvmOverloads constructor(
     }
 
     fun getBitmap(): Bitmap {
-        return bitmap.copy(Bitmap.Config.ARGB_8888, false)
+        return canvasBitmap.copy(Bitmap.Config.ARGB_8888, false)
     }
 
-    fun loadBitmap(savedBitmap: Bitmap) {
-        bitmap = savedBitmap.copy(Bitmap.Config.ARGB_8888, true)
-        canvasBitmap.setBitmap(bitmap)
-        invalidate()
+    fun loadBitmap(bitmap: Bitmap) {
+        if (::canvasBitmap.isInitialized) {
+            drawCanvas.drawBitmap(bitmap, 0f, 0f, null)
+            invalidate()
+        } else {
+            pendingBitmapToLoad = bitmap
+        }
     }
 
     fun updateBrush(color: Int, size: Float) {
