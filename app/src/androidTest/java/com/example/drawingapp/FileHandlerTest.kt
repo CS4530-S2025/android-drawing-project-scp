@@ -26,22 +26,27 @@ class FileHandlerTest {
     fun testSaveAndLoadDrawing() {
         val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
 
-        //Save the drawing with filename
+        // Save the drawing with filename
         fileHandler.saveDrawing(bitmap, testFilename)
 
-        //Load the saved drawing
-        val loadedBitmap = fileHandler.loadDrawing()
+        // Load the saved drawing
+        val loadedBitmap = fileHandler.loadDrawing(testFilename)
         assertNotNull("Loaded bitmap should not be null", loadedBitmap)
     }
 
     @Test
     fun testDeleteDrawing() {
-        fileHandler.deleteDrawing()
-        assertNull("File should be deleted", fileHandler.loadDrawing())
+        val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+        fileHandler.saveDrawing(bitmap, testFilename)
+
+        fileHandler.deleteDrawing(testFilename)
+        val deletedBitmap = fileHandler.loadDrawing(testFilename)
+
+        assertNull("File should be deleted", deletedBitmap)
     }
 
     @After
     fun tearDown() {
-        fileHandler.deleteDrawing() // Clean up
+        fileHandler.deleteDrawing(testFilename) //Clean up
     }
 }
