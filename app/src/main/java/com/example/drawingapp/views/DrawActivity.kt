@@ -16,8 +16,7 @@ import android.content.Intent
 import com.example.drawingapp.model.DrawingEntity
 import com.example.drawingapp.model.DrawingDatabase
 import kotlinx.coroutines.Dispatchers
-import androidx.core.content.FileProvider
-import java.io.File
+
 
 class DrawActivity : AppCompatActivity() {
 
@@ -31,9 +30,6 @@ class DrawActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_draw)
-
-        currentFilename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
-
 
         currentFilename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
 
@@ -92,7 +88,7 @@ class DrawActivity : AppCompatActivity() {
         saveButton.setOnClickListener {
             val bitmap = customCanvas.getBitmap()
 
-            fileHandler.saveDrawing(bitmap, currentFilename)
+            fileHandler.saveDrawing(bitmap, currentFilename) 
 
             val dao = DrawingDatabase.getDatabase(this).drawingDao()
             lifecycleScope.launch(Dispatchers.IO) {
@@ -110,36 +106,11 @@ class DrawActivity : AppCompatActivity() {
 
 
 
-        //Load Button, go to drawing list
+        // Load Button, go to drawing list
         loadButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }
-
-        //Share button
-        val shareButton = findViewById<Button>(R.id.shareButton)
-        shareButton.setOnClickListener {
-            shareDrawing(currentFilename)
-        }
-    }
-
-    private fun shareDrawing(filename: String) {
-        val file = File(filesDir, filename)
-
-        val uri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.provider",  // Same as authorities in manifest
-            file
-        )
-
-        val shareIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_STREAM, uri)
-            type = "image/png"
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-
-        startActivity(Intent.createChooser(shareIntent, "Share Drawing"))
     }
 }
