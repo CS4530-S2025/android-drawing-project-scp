@@ -16,6 +16,7 @@ compose-material3 = "1.2.0"
 navigation-compose = "2.7.7"
 lifecycle-viewmodel-compose = "2.8.0"
 room = "2.6.1"
+jetbrainsKotlinJvm = "1.9.22"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,4 +44,5 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 
