@@ -24,20 +24,21 @@ fun Application.module() {
         })
     }
 
+    val drawingStorage = mutableListOf<Drawing>()
+
     routing {
         get("/") {
             call.respondText("Hello from Ktor")
         }
 
         post("/uploadDrawing") {
-            try {
-                val drawing = call.receive<Drawing>()
-                println("✅ Server received drawing: $drawing")
-                call.respondText("Drawing received")
-            } catch (e: Exception) {
-                println("❌ Failed to parse drawing: ${e.message}")
-                call.respondText("Bad request", status = io.ktor.http.HttpStatusCode.BadRequest)
-            }
+            val drawing = call.receive<Drawing>()
+            drawingStorage.add(drawing)
+            call.respondText("Drawing received!")
+        }
+
+        get("/sharedDrawings") {
+            call.respond(drawingStorage)
         }
     }
 }

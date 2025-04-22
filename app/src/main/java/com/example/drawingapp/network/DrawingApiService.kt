@@ -27,20 +27,39 @@ object DrawingApiService {
             .post(requestBody)
             .build()
 
-        Log.d("Upload", "🚀 Sending POST to $BASE_URL/uploadDrawing")
+        Log.d("Upload", " Sending POST to $BASE_URL/uploadDrawing")
         Log.d("Upload", "Payload: $jsonBody")
 
         return@withContext try {
             val response = client.newCall(request).execute()
             val body = response.body?.string()
 
-            Log.d("Upload", "✅ Response code: ${response.code}")
-            Log.d("Upload", "✅ Response body: $body")
+            Log.d("Upload", " Response code: ${response.code}")
+            Log.d("Upload", " Response body: $body")
 
             response.isSuccessful
         } catch (e: Exception) {
-            Log.e("Upload", "❌ Upload failed: ${e.localizedMessage}", e)
+            Log.e("Upload", " Upload failed: ${e.localizedMessage}", e)
             false
+        }
+    }
+
+    suspend fun getSharedDrawings(): List<Drawing> = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url("$BASE_URL/sharedDrawings")
+            .get()
+            .build()
+
+        try {
+            val response = client.newCall(request).execute()
+            response.use {
+                if (!it.isSuccessful) return@withContext emptyList()
+                val jsonBody = it.body?.string() ?: return@withContext emptyList()
+                json.decodeFromString<List<Drawing>>(jsonBody)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 }
