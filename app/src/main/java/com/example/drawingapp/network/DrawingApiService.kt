@@ -16,7 +16,7 @@ object DrawingApiService {
     private val client = OkHttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 
-    private const val BASE_URL = "http://10.0.2.2:8080"
+    private const val BASE_URL = "http://10.0.2.2:8080" // emulator-safe
 
     suspend fun uploadDrawing(drawing: Drawing): Boolean = withContext(Dispatchers.IO) {
         val jsonBody = json.encodeToString(drawing)
@@ -27,11 +27,19 @@ object DrawingApiService {
             .post(requestBody)
             .build()
 
-        try {
+        Log.d("Upload", "🚀 Sending POST to $BASE_URL/uploadDrawing")
+        Log.d("Upload", "Payload: $jsonBody")
+
+        return@withContext try {
             val response = client.newCall(request).execute()
-            response.use { it.isSuccessful }
+            val body = response.body?.string()
+
+            Log.d("Upload", "✅ Response code: ${response.code}")
+            Log.d("Upload", "✅ Response body: $body")
+
+            response.isSuccessful
         } catch (e: Exception) {
-            Log.e("Upload", "Upload failed: ${e.localizedMessage}", e)
+            Log.e("Upload", "❌ Upload failed: ${e.localizedMessage}", e)
             false
         }
     }

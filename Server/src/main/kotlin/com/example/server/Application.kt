@@ -9,6 +9,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.request.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -18,7 +19,9 @@ fun main() {
 
 fun Application.module() {
     install(ContentNegotiation) {
-        json()
+        json(Json {
+            ignoreUnknownKeys = true
+        })
     }
 
     routing {
@@ -27,8 +30,14 @@ fun Application.module() {
         }
 
         post("/uploadDrawing") {
-            val drawing = call.receive<Drawing>()
-            call.respondText("Drawing received")
+            try {
+                val drawing = call.receive<Drawing>()
+                println("✅ Server received drawing: $drawing")
+                call.respondText("Drawing received")
+            } catch (e: Exception) {
+                println("❌ Failed to parse drawing: ${e.message}")
+                call.respondText("Bad request", status = io.ktor.http.HttpStatusCode.BadRequest)
+            }
         }
     }
 }

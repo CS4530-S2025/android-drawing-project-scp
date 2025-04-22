@@ -110,6 +110,7 @@ fun DrawingListScreen(
                         },
                         onUploadClick = {
                             selectedDrawing = drawing
+                            drawingName = drawing.name
                             showDialog = true
                         }
                     )
