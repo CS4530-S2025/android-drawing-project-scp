@@ -12,9 +12,10 @@ class SharedDrawingsViewModel : ViewModel() {
     private val _sharedDrawings = MutableStateFlow<List<Drawing>>(emptyList())
     val sharedDrawings: StateFlow<List<Drawing>> = _sharedDrawings
 
-    init {
+    fun loadSharedDrawings() {
         viewModelScope.launch {
-            _sharedDrawings.value = DrawingApiService.getSharedDrawings()
+            val result = DrawingApiService.getSharedDrawings()
+            _sharedDrawings.value = result
         }
     }
 }

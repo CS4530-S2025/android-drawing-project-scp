@@ -15,6 +15,10 @@ import com.example.drawingapp.viewmodel.SharedDrawingsViewModel
 fun SharedDrawingsScreen(viewModel: SharedDrawingsViewModel = viewModel()) {
     val drawings by viewModel.sharedDrawings.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.loadSharedDrawings()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Shared Drawings") })
