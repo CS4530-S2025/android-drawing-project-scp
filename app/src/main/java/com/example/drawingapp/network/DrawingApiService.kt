@@ -27,13 +27,13 @@ object DrawingApiService {
             val imageBytes = FileHandler(context).loadDrawingAsByteArray(drawing.filename)
 
             if (imageBytes.isEmpty()) {
-                Log.e(TAG, "❌ Image byte array is empty — file may not exist!")
+                Log.e(TAG, "Image byte array is empty — file may not exist!")
                 return@withContext false
             }
 
             val drawingJson = json.encodeToString(drawing)
 
-            Log.d("Upload", "📤 Sending drawing JSON = ${Json.encodeToString(drawing)}")
+            Log.d("Upload", "Sending drawing JSON = ${Json.encodeToString(drawing)}")
 
             val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart(
@@ -52,19 +52,19 @@ object DrawingApiService {
                 .post(requestBody)
                 .build()
 
-            Log.d(TAG, "🚀 Sending POST to $BASE_URL/uploadDrawing")
-            Log.d(TAG, "📄 JSON Body: $drawingJson")
-            Log.d(TAG, "📦 Image size: ${imageBytes.size} bytes")
+            Log.d(TAG, "Sending POST to $BASE_URL/uploadDrawing")
+            Log.d(TAG, "JSON Body: $drawingJson")
+            Log.d(TAG, "Image size: ${imageBytes.size} bytes")
 
             val response = client.newCall(request).execute()
             val body = response.body?.string()
 
-            Log.d(TAG, "✅ Response code: ${response.code}")
-            Log.d(TAG, "✅ Response body: $body")
+            Log.d(TAG, "Response code: ${response.code}")
+            Log.d(TAG, "Response body: $body")
 
             response.isSuccessful
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Upload failed: ${e.localizedMessage}", e)
+            Log.e(TAG, "Upload failed: ${e.localizedMessage}", e)
             false
         }
     }
@@ -79,17 +79,17 @@ object DrawingApiService {
             val response = client.newCall(request).execute()
             response.use {
                 if (!it.isSuccessful) {
-                    Log.e(TAG, "❌ Failed to get shared drawings. HTTP ${it.code}")
+                    Log.e(TAG, "Failed to get shared drawings. HTTP ${it.code}")
                     return@withContext emptyList()
                 }
 
                 val jsonBody = it.body?.string() ?: return@withContext emptyList()
-                Log.d(TAG, "📥 Received shared drawings: $jsonBody")
+                Log.d(TAG, "Received shared drawings: $jsonBody")
 
                 json.decodeFromString<List<Drawing>>(jsonBody)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to fetch shared drawings: ${e.localizedMessage}", e)
+            Log.e(TAG, "Failed to fetch shared drawings: ${e.localizedMessage}", e)
             emptyList()
         }
     }

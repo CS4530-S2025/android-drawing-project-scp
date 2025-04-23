@@ -4,11 +4,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.drawingapp.viewmodel.SharedDrawingsViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.drawingapp.network.DrawingApiService.BASE_URL
@@ -16,7 +19,7 @@ import com.example.drawingapp.network.DrawingApiService.BASE_URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SharedDrawingsScreen(viewModel: SharedDrawingsViewModel = viewModel()) {
+fun SharedDrawingsScreen(navController: NavController, viewModel: SharedDrawingsViewModel = viewModel()) {
     val drawings by viewModel.sharedDrawings.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -25,7 +28,18 @@ fun SharedDrawingsScreen(viewModel: SharedDrawingsViewModel = viewModel()) {
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Shared Drawings") })
+            TopAppBar(
+                title = { Text("Shared Drawings") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+
         }
     ) { padding ->
         LazyColumn(

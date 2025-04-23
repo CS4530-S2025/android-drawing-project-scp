@@ -26,7 +26,7 @@ fun AppNavHost(navController: NavHostController) {
 
         //shared drawings screen
         composable("shared") {
-            SharedDrawingsScreen()
+            SharedDrawingsScreen(navController)
         }
 
         //drawing editor screen, accepts filename as argument

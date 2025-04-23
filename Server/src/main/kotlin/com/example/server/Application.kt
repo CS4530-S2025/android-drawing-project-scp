@@ -48,21 +48,21 @@ fun Application.module() {
             var drawing: Drawing? = null
             var imageFileName: String? = null
 
-            println("🌐 Received POST request to /uploadDrawing")
+            println("Received POST request to /uploadDrawing")
 
 
             multipart.forEachPart { part ->
-                println("🧩 Part = ${part::class.simpleName}, name=${part.name}, filename=${(part as? PartData.FileItem)?.originalFileName}")
+                println("Part = ${part::class.simpleName}, name=${part.name}, filename=${(part as? PartData.FileItem)?.originalFileName}")
 
                 when (part) {
                     is PartData.FormItem -> {
-                        println("📝 Received form item: ${part.name}")
+                        println("Received form item: ${part.name}")
                         if (part.name == "drawing") {
                             try {
                                 drawing = Json.decodeFromString<Drawing>(part.value)
-                                println("✅ Parsed drawing: $drawing")
+                                println("Parsed drawing: $drawing")
                             } catch (e: Exception) {
-                                println("❌ Failed to parse drawing JSON: ${e.localizedMessage}")
+                                println("Failed to parse drawing JSON: ${e.localizedMessage}")
                             }
                         }
                     }
@@ -73,12 +73,12 @@ fun Application.module() {
                             val fileBytes = part.streamProvider().readBytes()
                             File("uploads/$fileName").writeBytes(fileBytes)
                             imageFileName = fileName
-                            println("✅ Saved image to uploads/$fileName")
+                            println("Saved image to uploads/$fileName")
                         }
                     }
 
                     else -> {
-                        println("⚠️ Unknown multipart part: $part")
+                        println("⚠Unknown multipart part: $part")
                     }
                 }
 
@@ -87,10 +87,10 @@ fun Application.module() {
 
             if (drawing != null && imageFileName != null) {
                 drawingStorage.add(drawing!!)
-                println("✅ Drawing stored successfully.")
+                println("Drawing stored successfully.")
                 call.respondText("Drawing received")
             } else {
-                println("❌ Missing data: drawing=$drawing, image=$imageFileName")
+                println("Missing data: drawing=$drawing, image=$imageFileName")
                 call.respond(HttpStatusCode.BadRequest, "Missing data")
             }
         }
