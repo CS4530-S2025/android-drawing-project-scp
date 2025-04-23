@@ -20,32 +20,54 @@ object DrawingApiService {
     private val json = Json { ignoreUnknownKeys = true }
 
     const val BASE_URL = "http://10.0.2.2:8080"
+    private const val TAG = "Upload"
 
     suspend fun uploadDrawing(context: Context, drawing: Drawing): Boolean = withContext(Dispatchers.IO) {
-        val fileHandler = FileHandler(context)
-        val imageBytes = fileHandler.loadDrawingAsByteArray(drawing.filename)
-
-        val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
-            .addFormDataPart("drawing", "drawing.json",
-                json.encodeToString(drawing).toRequestBody("application/json".toMediaType()))
-            .addFormDataPart("image", drawing.filename,
-                imageBytes.toRequestBody("image/png".toMediaType()))
-            .build()
-
-        val request = Request.Builder()
-            .url("$BASE_URL/uploadDrawing")
-            .post(requestBody)
-            .build()
-
         try {
+            val imageBytes = FileHandler(context).loadDrawingAsByteArray(drawing.filename)
+
+            if (imageBytes.isEmpty()) {
+                Log.e(TAG, "❌ Image byte array is empty — file may not exist!")
+                return@withContext false
+            }
+
+            val drawingJson = json.encodeToString(drawing)
+
+            Log.d("Upload", "📤 Sending drawing JSON = ${Json.encodeToString(drawing)}")
+
+            val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart(
+                    name = "drawing",
+                    value = Json.encodeToString(drawing)
+                )
+                .addFormDataPart(
+                    name = "image",
+                    filename = drawing.filename,
+                    body = imageBytes.toRequestBody("image/png".toMediaType())
+                )
+                .build()
+
+            val request = Request.Builder()
+                .url("$BASE_URL/uploadDrawing")
+                .post(requestBody)
+                .build()
+
+            Log.d(TAG, "🚀 Sending POST to $BASE_URL/uploadDrawing")
+            Log.d(TAG, "📄 JSON Body: $drawingJson")
+            Log.d(TAG, "📦 Image size: ${imageBytes.size} bytes")
+
             val response = client.newCall(request).execute()
-            response.use { it.isSuccessful }
+            val body = response.body?.string()
+
+            Log.d(TAG, "✅ Response code: ${response.code}")
+            Log.d(TAG, "✅ Response body: $body")
+
+            response.isSuccessful
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "❌ Upload failed: ${e.localizedMessage}", e)
             false
         }
     }
-
 
     suspend fun getSharedDrawings(): List<Drawing> = withContext(Dispatchers.IO) {
         val request = Request.Builder()
@@ -56,12 +78,18 @@ object DrawingApiService {
         try {
             val response = client.newCall(request).execute()
             response.use {
-                if (!it.isSuccessful) return@withContext emptyList()
+                if (!it.isSuccessful) {
+                    Log.e(TAG, "❌ Failed to get shared drawings. HTTP ${it.code}")
+                    return@withContext emptyList()
+                }
+
                 val jsonBody = it.body?.string() ?: return@withContext emptyList()
+                Log.d(TAG, "📥 Received shared drawings: $jsonBody")
+
                 json.decodeFromString<List<Drawing>>(jsonBody)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "❌ Failed to fetch shared drawings: ${e.localizedMessage}", e)
             emptyList()
         }
     }

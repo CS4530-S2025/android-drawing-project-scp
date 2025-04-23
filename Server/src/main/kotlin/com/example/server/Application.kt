@@ -29,6 +29,11 @@ fun Application.module() {
         })
     }
 
+    val uploadDir = File("uploads")
+    if (!uploadDir.exists()) {
+        uploadDir.mkdirs()
+    }
+
     val drawingStorage = mutableListOf<Drawing>()
 
     routing {
@@ -36,36 +41,61 @@ fun Application.module() {
             call.respondText("Hello from Ktor")
         }
 
+
+
         post("/uploadDrawing") {
             val multipart = call.receiveMultipart()
             var drawing: Drawing? = null
             var imageFileName: String? = null
 
+            println("🌐 Received POST request to /uploadDrawing")
+
+
             multipart.forEachPart { part ->
+                println("🧩 Part = ${part::class.simpleName}, name=${part.name}, filename=${(part as? PartData.FileItem)?.originalFileName}")
+
                 when (part) {
                     is PartData.FormItem -> {
+                        println("📝 Received form item: ${part.name}")
                         if (part.name == "drawing") {
-                            drawing = Json.decodeFromString<Drawing>(part.value)
+                            try {
+                                drawing = Json.decodeFromString<Drawing>(part.value)
+                                println("✅ Parsed drawing: $drawing")
+                            } catch (e: Exception) {
+                                println("❌ Failed to parse drawing JSON: ${e.localizedMessage}")
+                            }
                         }
                     }
+
                     is PartData.FileItem -> {
-                        val fileName = part.originalFileName ?: "uploaded.png"
-                        val fileBytes = part.streamProvider().readBytes()
-                        File("uploads/$fileName").writeBytes(fileBytes)
-                        imageFileName = fileName
+                        if (part.name == "image") {
+                            val fileName = part.originalFileName ?: "uploaded.png"
+                            val fileBytes = part.streamProvider().readBytes()
+                            File("uploads/$fileName").writeBytes(fileBytes)
+                            imageFileName = fileName
+                            println("✅ Saved image to uploads/$fileName")
+                        }
                     }
-                    else -> {}
+
+                    else -> {
+                        println("⚠️ Unknown multipart part: $part")
+                    }
                 }
+
                 part.dispose()
             }
 
             if (drawing != null && imageFileName != null) {
                 drawingStorage.add(drawing!!)
+                println("✅ Drawing stored successfully.")
                 call.respondText("Drawing received")
             } else {
+                println("❌ Missing data: drawing=$drawing, image=$imageFileName")
                 call.respond(HttpStatusCode.BadRequest, "Missing data")
             }
         }
+
+
         get("/drawingImage/{filename}") {
             val filename = call.parameters["filename"]
             val file = File("uploads/$filename")
