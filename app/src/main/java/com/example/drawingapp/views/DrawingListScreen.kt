@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -27,6 +28,8 @@ fun DrawingListScreen(
     viewModel: DrawingListViewModel = viewModel(),
     drawViewModel: DrawViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     var showDialog by remember { mutableStateOf(false) }
     var drawingName by remember { mutableStateOf("") }
     var selectedDrawing by remember { mutableStateOf<DrawingEntity?>(null) }
@@ -59,13 +62,14 @@ fun DrawingListScreen(
                             name = drawingName,
                             lastEdited = System.currentTimeMillis()
                         )
-                        drawViewModel.uploadCurrentDrawing(drawing)
+                        drawViewModel.uploadCurrentDrawing(drawing, context)
                     }
                     showDialog = false
                     drawingName = ""
                 }) {
                     Text("Upload")
                 }
+
             },
             dismissButton = {
                 TextButton(onClick = {

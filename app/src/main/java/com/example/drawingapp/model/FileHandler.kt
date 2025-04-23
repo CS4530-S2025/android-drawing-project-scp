@@ -42,4 +42,9 @@ class FileHandler(private val context: Context) {
             file.delete()
         }
     }
+
+    fun loadDrawingAsByteArray(filename: String): ByteArray {
+        val file = File(context.filesDir, filename)
+        return file.readBytes()
+    }
 }

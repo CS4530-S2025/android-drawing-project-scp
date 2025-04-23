@@ -1,5 +1,6 @@
 package com.example.drawingapp.viewmodel
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
@@ -25,9 +26,9 @@ class DrawViewModel : ViewModel() {
         brushSize = size
     }
 
-    fun uploadCurrentDrawing(drawing: Drawing) {
+    fun uploadCurrentDrawing(drawing: Drawing, context: Context) {
         viewModelScope.launch {
-            val success = DrawingApiService.uploadDrawing(drawing)
+            val success = DrawingApiService.uploadDrawing(context, drawing)
             if (success) {
                 Log.d("Upload", "Drawing uploaded successfully.")
             } else {
