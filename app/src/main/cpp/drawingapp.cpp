@@ -3,14 +3,21 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <android/log.h>
+#define LOG_TAG "NativeFilters"
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_example_yourpackage_NativeImageFilters_invertColors(JNIEnv* env, jobject, jobject bitmap) {
-    AndroidBitmapInfo info;
-    void* pixels;
-
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_drawingapp_NativeImageFilters_invertColors(JNIEnv* env, jobject, jobject bitmap) {
+AndroidBitmapInfo info;
+void* pixels;
     if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) return;
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGD("Unsupported bitmap format: %d", info.format);
+        return;
+    }
+
     if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) return;
 
     uint32_t* line = (uint32_t*)pixels;
@@ -30,13 +37,15 @@ Java_com_example_yourpackage_NativeImageFilters_invertColors(JNIEnv* env, jobjec
     AndroidBitmap_unlockPixels(env, bitmap);
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_com_example_yourpackage_NativeImageFilters_addNoise(JNIEnv* env, jobject, jobject bitmap) {
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_drawingapp_NativeImageFilters_addNoise(JNIEnv* env, jobject, jobject bitmap) {
     srand(time(0));
     AndroidBitmapInfo info;
     void* pixels;
 
     if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) return;
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) return;
     if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) return;
 
     uint32_t* line = (uint32_t*)pixels;
@@ -49,7 +58,7 @@ Java_com_example_yourpackage_NativeImageFilters_addNoise(JNIEnv* env, jobject, j
             uint8_t g = (pixel >> 8) & 0xFF;
             uint8_t b = pixel & 0xFF;
 
-            int noise = rand() % 50 - 25; // random between -25 and +25
+            int noise = rand() % 150 - 75;
             r = std::min(255, std::max(0, r + noise));
             g = std::min(255, std::max(0, g + noise));
             b = std::min(255, std::max(0, b + noise));

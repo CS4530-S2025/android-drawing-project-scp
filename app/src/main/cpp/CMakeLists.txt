@@ -5,6 +5,8 @@
 
 # Sets the minimum CMake version required for this project.
 cmake_minimum_required(VERSION 3.22.1)
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD 17)
 
 # Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
 # Since this is the top level CMakeLists.txt, the project name is also accessible
@@ -38,3 +40,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     log
     jnigraphics
 )
+
+include_directories(${CMAKE_SYSROOT}/usr/include)
