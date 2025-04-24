@@ -1,8 +1,8 @@
-package com.example.yourpackage
+package com.example.drawingapp
 
 object NativeImageFilters {
     init {
-        System.loadLibrary("imagefilters")
+        System.loadLibrary("drawingapp")
     }
 
     external fun invertColors(bitmap: android.graphics.Bitmap)

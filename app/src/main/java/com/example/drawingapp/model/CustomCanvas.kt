@@ -25,9 +25,20 @@ class CustomCanvas @JvmOverloads constructor(
         color = Color.BLACK
     }
 
-    private lateinit var canvasBitmap: Bitmap    //Holds the image pixels
-    private lateinit var drawCanvas: Canvas      //Used to draw on the bitmap
-    private var pendingBitmapToLoad: Bitmap? = null  //Bitmap to be drawn after size is set
+    private lateinit var canvasBitmap: Bitmap    // Holds the image pixels
+    private lateinit var drawCanvas: Canvas      // Used to draw on the bitmap
+    private var pendingBitmapToLoad: Bitmap? = null  // Bitmap to be drawn after size is set
+
+    // Optional callback for notifying when a stroke is completed
+    interface OnDrawListener {
+        fun onStrokeCompleted()
+    }
+
+    private var drawListener: OnDrawListener? = null
+
+    fun setOnDrawListener(listener: OnDrawListener?) {
+        drawListener = listener
+    }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
@@ -36,7 +47,7 @@ class CustomCanvas @JvmOverloads constructor(
         drawCanvas = Canvas(canvasBitmap)
         drawCanvas.drawColor(Color.WHITE)
 
-        //Handle delayed bitmap load
+        // Handle delayed bitmap load
         pendingBitmapToLoad?.let {
             drawCanvas.drawBitmap(it, 0f, 0f, null)
             pendingBitmapToLoad = null
@@ -72,6 +83,8 @@ class CustomCanvas @JvmOverloads constructor(
             }
             MotionEvent.ACTION_UP -> {
                 currentPath.reset()
+                // Notify activity that stroke has completed
+                drawListener?.onStrokeCompleted()
             }
         }
 

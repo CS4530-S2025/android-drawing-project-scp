@@ -10,7 +10,10 @@
         <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">1000</item> <!-- 1 second -->
     </style>
 
-    <style name="Theme.DrawingApp" parent="Base.Theme.DrawingApp" />
+    <style name="Theme.DrawingApp" parent="Base.Theme.DrawingApp">
+        <item name="actionBarTheme">@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+    </style>
 
     <!-- New Theme for WelcomeScreenActivity -->
     <style name="Theme.DrawingApp.FullScreen" parent="Theme.Material3.DayNight.NoActionBar">
