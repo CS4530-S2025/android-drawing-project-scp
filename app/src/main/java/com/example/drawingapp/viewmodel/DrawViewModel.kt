@@ -1,9 +1,16 @@
 package com.example.drawingapp.viewmodel
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import androidx.lifecycle.ViewModel
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import com.example.drawingapp.model.Drawing
+import com.example.drawingapp.model.FileHandler
+import com.example.drawingapp.network.DrawingApiService
+import kotlinx.coroutines.launch
 
 class DrawViewModel : ViewModel() {
 
@@ -19,5 +26,21 @@ class DrawViewModel : ViewModel() {
         brushColor = color
         brushSize = size
     }
+
+    fun uploadCurrentDrawing(drawing: Drawing, context: Context) {
+        viewModelScope.launch {
+            drawingBitmap?.let { bitmap ->
+                FileHandler(context).saveDrawing(bitmap, drawing.filename)
+            }
+
+            val success = DrawingApiService.uploadDrawing(context, drawing)
+            if (success) {
+                Log.d("Upload", "Drawing uploaded successfully.")
+            } else {
+                Log.e("Upload", "Failed to upload drawing.")
+            }
+        }
+    }
+
 
 }
