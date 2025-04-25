@@ -1,5 +1,6 @@
 package com.example.drawingapp.views
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +34,9 @@ fun DrawingListScreen(
     var showDialog by remember { mutableStateOf(false) }
     var drawingName by remember { mutableStateOf("") }
     var selectedDrawing by remember { mutableStateOf<DrawingEntity?>(null) }
+
+    var showCreateDialog by remember { mutableStateOf(false) }
+    var newDrawingName by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         viewModel.refreshDrawings()
@@ -69,12 +73,49 @@ fun DrawingListScreen(
                 }) {
                     Text("Upload")
                 }
-
             },
             dismissButton = {
                 TextButton(onClick = {
                     showDialog = false
                     drawingName = ""
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showCreateDialog) {
+        AlertDialog(
+            onDismissRequest = { showCreateDialog = false },
+            title = { Text("New Drawing") },
+            text = {
+                OutlinedTextField(
+                    value = newDrawingName,
+                    onValueChange = { newDrawingName = it },
+                    label = { Text("Enter drawing name") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val drawingNameFinal = newDrawingName.ifBlank { "Untitled" }
+                    val filename = "drawing_${System.currentTimeMillis()}.png"
+                    val intent = Intent(context, DrawActivity::class.java)
+                    intent.putExtra("filename", filename)
+                    intent.putExtra("drawingName", drawingNameFinal)
+                    context.startActivity(intent)
+
+                    showCreateDialog = false
+                    newDrawingName = ""
+                }) {
+                    Text("Create")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showCreateDialog = false
+                    newDrawingName = ""
                 }) {
                     Text("Cancel")
                 }
@@ -98,9 +139,7 @@ fun DrawingListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                //create a new drawing with unique filename
-                val filename = "drawing_${System.currentTimeMillis()}.png"
-                navController.navigate("draw/$filename")
+                showCreateDialog = true
             }) {
                 Text("+")
             }
@@ -177,3 +216,4 @@ fun DrawingListItem(
         }
     }
 }
+

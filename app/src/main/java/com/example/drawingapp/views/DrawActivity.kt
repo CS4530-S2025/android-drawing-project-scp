@@ -24,11 +24,10 @@ class DrawActivity : AppCompatActivity() {
     private lateinit var customCanvas: CustomCanvas
     private lateinit var fileHandler: FileHandler
     private lateinit var currentFilename: String
+    private lateinit var currentDrawingName: String
 
-    // 🎨 This is the clean source we always draw to
     private var baseCanvasBitmap: Bitmap? = null
 
-    // Filter toggles
     private var isInvertOn = false
     private var isNoiseOn = false
 
@@ -38,17 +37,18 @@ class DrawActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_draw)
 
-        // Init canvas + filename
+        //init canvas + filename
         currentFilename = intent.getStringExtra("filename") ?: "drawing_${System.currentTimeMillis()}.png"
+        currentDrawingName = intent.getStringExtra("drawingName") ?: "Untitled"
         customCanvas = findViewById(R.id.drawCanvas)
         fileHandler = FileHandler(this)
 
-        // Load any saved bitmap
+        //load any saved bitmap
         val savedBitmap = fileHandler.loadDrawing(currentFilename)
         savedBitmap?.let {
             customCanvas.loadBitmap(it)
 
-            // Delay snapshot of clean version
+            //delay snapshot of clean version
             customCanvas.post {
                 baseCanvasBitmap = customCanvas.getBitmap().copy(Bitmap.Config.ARGB_8888, true)
                 applySelectedFilters()
@@ -56,7 +56,7 @@ class DrawActivity : AppCompatActivity() {
             }
         }
 
-        // Init canvas snapshot if nothing was loaded
+        //init canvas snapshot if nothing was loaded
         customCanvas.post {
             if (baseCanvasBitmap == null) {
                 updateCanvasMirror()
@@ -64,7 +64,7 @@ class DrawActivity : AppCompatActivity() {
             }
         }
 
-        // Set up drawing brush
+        //set up drawing brush
         val sizeSeekBar = findViewById<SeekBar>(R.id.sizeSeekBar)
         val colorButton = findViewById<Button>(R.id.colorButton)
         val saveButton = findViewById<Button>(R.id.saveButton)
@@ -111,7 +111,7 @@ class DrawActivity : AppCompatActivity() {
                 dao.insert(
                     DrawingEntity(
                         filename = currentFilename,
-                        name = "Untitled",
+                        name = currentDrawingName,
                         lastEdited = System.currentTimeMillis()
                     )
                 )
@@ -126,7 +126,7 @@ class DrawActivity : AppCompatActivity() {
             finish()
         }
 
-        // 🎯 Attach listener to capture clean drawing updates
+        // attach listener to capture clean drawing updates
         customCanvas.setOnDrawListener(object : CustomCanvas.OnDrawListener {
             override fun onStrokeCompleted() {
                 updateCanvasMirror()
@@ -136,7 +136,7 @@ class DrawActivity : AppCompatActivity() {
 
 
 
-        // 🧪 Filter toggle buttons
+        //filter toggle buttons
         val invertToggle = findViewById<ToggleButton>(R.id.toggleInvert)
         val noiseToggle = findViewById<ToggleButton>(R.id.toggleNoise)
 
@@ -151,8 +151,8 @@ class DrawActivity : AppCompatActivity() {
         }
     }
 
-    // 🧠 This function NEVER updates baseCanvasBitmap
-    // It always applies filters to a copy of the clean version
+    //this function NEVER updates baseCanvasBitmap
+    //it always applies filters to a copy of the clean version
     private fun applySelectedFilters() {
         val source = baseCanvasBitmap ?: return
         val result = source.copy(Bitmap.Config.ARGB_8888, true)
