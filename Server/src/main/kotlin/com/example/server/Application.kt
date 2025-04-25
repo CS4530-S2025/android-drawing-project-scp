@@ -111,6 +111,25 @@ fun Application.module() {
         get("/sharedDrawings") {
             call.respond(drawingStorage)
         }
+
+        post("/signup") {
+            val authRequest = call.receive<AuthRequest>()
+            println("Signup: ${authRequest.username}")
+
+            // You could save to a real DB, but just fake it for now
+            call.respond(AuthResponse(token = "fake-token-${authRequest.username}"))
+        }
+
+        post("/login") {
+            val authRequest = call.receive<AuthRequest>()
+            println("Login: ${authRequest.username}")
+
+            if (authRequest.password == "password123") {
+                call.respond(AuthResponse(token = "fake-token-${authRequest.username}"))
+            } else {
+                call.respondText("Invalid credentials", status = HttpStatusCode.Unauthorized)
+            }
+        }
     }
 }
 

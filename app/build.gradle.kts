@@ -85,6 +85,10 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
+
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
