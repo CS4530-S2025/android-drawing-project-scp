@@ -12,7 +12,8 @@ class CustomCanvas @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private data class Stroke(val path: Path, val paint: Paint)
+    // Make Stroke PUBLIC (not private)
+    data class Stroke(val path: Path, val paint: Paint)
 
     private val strokes = mutableListOf<Stroke>()
     private var currentPath = Path()
@@ -25,11 +26,10 @@ class CustomCanvas @JvmOverloads constructor(
         color = Color.BLACK
     }
 
-    private lateinit var canvasBitmap: Bitmap    // Holds the image pixels
-    private lateinit var drawCanvas: Canvas      // Used to draw on the bitmap
-    private var pendingBitmapToLoad: Bitmap? = null  // Bitmap to be drawn after size is set
+    private lateinit var canvasBitmap: Bitmap
+    private lateinit var drawCanvas: Canvas
+    private var pendingBitmapToLoad: Bitmap? = null
 
-    // Optional callback for notifying when a stroke is completed
     interface OnDrawListener {
         fun onStrokeCompleted()
     }
@@ -47,7 +47,6 @@ class CustomCanvas @JvmOverloads constructor(
         drawCanvas = Canvas(canvasBitmap)
         drawCanvas.drawColor(Color.WHITE)
 
-        // Handle delayed bitmap load
         pendingBitmapToLoad?.let {
             drawCanvas.drawBitmap(it, 0f, 0f, null)
             pendingBitmapToLoad = null
@@ -59,6 +58,7 @@ class CustomCanvas @JvmOverloads constructor(
         super.onDraw(canvas)
 
         canvas.drawBitmap(canvasBitmap, 0f, 0f, null)
+
         for (stroke in strokes) {
             canvas.drawPath(stroke.path, stroke.paint)
         }
@@ -79,11 +79,10 @@ class CustomCanvas @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 currentPath.lineTo(x, y)
-                drawCanvas.drawPath(currentPath, currentPaint)
             }
             MotionEvent.ACTION_UP -> {
-                currentPath.reset()
-                // Notify activity that stroke has completed
+                currentPath.lineTo(x, y)
+                currentPath = Path()
                 drawListener?.onStrokeCompleted()
             }
         }
@@ -112,5 +111,18 @@ class CustomCanvas @JvmOverloads constructor(
 
     fun getCurrentBrushColor(): Int {
         return currentPaint.color
+    }
+
+    fun loadBaseBitmap(bitmap: Bitmap) {
+        canvasBitmap = bitmap
+        invalidate()
+    }
+
+    fun getBaseBitmap(): Bitmap {
+        return canvasBitmap
+    }
+
+    fun getAllStrokes(): List<Stroke> {
+        return strokes
     }
 }

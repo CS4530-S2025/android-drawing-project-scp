@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import com.example.drawingapp.NativeImageFilters
 import com.example.drawingapp.model.DrawingDatabase
 import com.example.drawingapp.model.DrawingEntity
+import android.graphics.Canvas
 
 class DrawActivity : AppCompatActivity() {
 
@@ -151,23 +152,33 @@ class DrawActivity : AppCompatActivity() {
         }
     }
 
-    // 🧠 This function NEVER updates baseCanvasBitmap
-    // It always applies filters to a copy of the clean version
     private fun applySelectedFilters() {
         val source = baseCanvasBitmap ?: return
-        val result = source.copy(Bitmap.Config.ARGB_8888, true)
+        val filtered = source.copy(Bitmap.Config.ARGB_8888, true)
 
-        if (isInvertOn) NativeImageFilters.invertColors(result)
-        if (isNoiseOn) NativeImageFilters.addNoise(result)
+        if (isInvertOn) NativeImageFilters.invertColors(filtered)
+        if (isNoiseOn) NativeImageFilters.addNoise(filtered)
 
-        Log.d("FILTERS", "Applied filters: Invert=$isInvertOn, Noise=$isNoiseOn")
-        customCanvas.loadBitmap(result)
-        Log.d("FILTERS", "baseCanvas size = ${source.width}x${source.height}")
+        customCanvas.loadBaseBitmap(filtered)
     }
+
 
     private fun updateCanvasMirror() {
-        baseCanvasBitmap = customCanvas.getBitmap().copy(Bitmap.Config.ARGB_8888, true)
-        Log.d("CANVAS", "Updated baseCanvasBitmap snapshot")
+        // 1. Create a new empty Bitmap (baseCanvasBitmap) same size as canvas
+        baseCanvasBitmap = Bitmap.createBitmap(customCanvas.width, customCanvas.height, Bitmap.Config.ARGB_8888)
+
+        // 2. Create a new android.graphics.Canvas tied to this Bitmap
+        val baseCanvas = Canvas(baseCanvasBitmap!!)
+
+        // 3. Draw background first
+        baseCanvas.drawBitmap(customCanvas.getBaseBitmap(), 0f, 0f, null)
+
+        // 4. Draw all strokes individually
+        for (stroke in customCanvas.getAllStrokes()) {
+            baseCanvas.drawPath(stroke.path, stroke.paint)
+        }
     }
+
+
 
 }
