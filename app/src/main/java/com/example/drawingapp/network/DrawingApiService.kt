@@ -13,6 +13,10 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import com.example.drawingapp.model.AuthRequest
+import com.example.drawingapp.model.AuthResponse
+import kotlinx.serialization.Serializable
+
 
 object DrawingApiService {
 
@@ -21,6 +25,12 @@ object DrawingApiService {
 
     const val BASE_URL = "http://10.0.2.2:8080"
     private const val TAG = "Upload"
+
+    @Serializable
+    data class SignupResult(
+        val success: Boolean,
+        val message: String
+    )
 
     suspend fun uploadDrawing(context: Context, drawing: Drawing): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -68,6 +78,61 @@ object DrawingApiService {
             false
         }
     }
+
+    suspend fun signup(username: String, password: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val body = json.encodeToString(AuthRequest(username, password))
+                .toRequestBody("application/json".toMediaType())
+
+            val request = Request.Builder()
+                .url("$BASE_URL/signup")
+                .post(body)
+                .build()
+
+            val response = client.newCall(request).execute()
+            val jsonBody = response.body?.string() ?: ""
+
+            Log.d(TAG, "Signup response code: ${response.code}")
+            Log.d(TAG, "Signup response body: $jsonBody")
+
+            if (!response.isSuccessful) {
+                Log.e(TAG, "Signup failed with HTTP ${response.code}")
+                return@withContext false
+            }
+
+            val signupResult = json.decodeFromString<SignupResult>(jsonBody)
+            signupResult.success
+        } catch (e: Exception) {
+            Log.e(TAG, "Signup failed: ${e.localizedMessage}", e)
+            false
+        }
+    }
+
+
+
+    suspend fun login(username: String, password: String): String? = withContext(Dispatchers.IO) {
+        try {
+            val body = json.encodeToString(AuthRequest(username, password))
+                .toRequestBody("application/json".toMediaType())
+
+            val request = Request.Builder()
+                .url("$BASE_URL/login")
+                .post(body)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) return@withContext null
+
+            val jsonBody = response.body?.string() ?: return@withContext null
+            Log.d(TAG, "Login response: $jsonBody")
+
+            json.decodeFromString<AuthResponse>(jsonBody).token
+        } catch (e: Exception) {
+            Log.e(TAG, "Login failed: ${e.localizedMessage}", e)
+            null
+        }
+    }
+
 
     suspend fun getSharedDrawings(): List<Drawing> = withContext(Dispatchers.IO) {
         val request = Request.Builder()
